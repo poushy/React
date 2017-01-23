@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hello World</title>
+    <script src="https://unpkg.com/react@latest/dist/react.js"></script>
+    <script src="https://unpkg.com/react-dom@latest/dist/react-dom.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+
+	function Name(props) {
+	  return <h1>{props.name.firstName} {props.name.lastName}</h1>;
+	}
+
+	function Address(props) {
+	  return <h3>{props.address}</h3>;
+	}
+
+	function Phone(props) {
+	  return <h3>{props.phone}</h3>;
+	}
+
+	function Comments(props) {
+	  return <p>{props.comments}</p>;
+	}
+
+	function Card(props) {
+	  return ( 
+	  		<div>
+		  		<Name name={props.details.name} />
+		  		<Address address={props.details.address} />
+		  		<Phone phone={props.details.phoneNumber} />
+		  		<br/>
+		  		<Comments comments={props.details.comments} />
+			</div>
+		);
+	}
+
+	let person = {
+		name: {
+			firstName: "Ravi",
+			lastName: "Shankar"
+		},
+		address: "24th Edward Street, Morrison Ave.",
+		phoneNumber: "+1-123-4567",
+		comments: "He is a musician, and specializes in Sitar and Classical music!"
+
+	}
+	const element = <Card details={person}/>;
+
+	ReactDOM.render(
+	  element,
+	  document.getElementById('root')
+	);
+
+</script>
+  </body>
+</html>
