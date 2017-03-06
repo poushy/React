@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hello World</title>
+    <script src="https://unpkg.com/react@latest/dist/react.js"></script>
+    <script src="https://unpkg.com/react-dom@latest/dist/react-dom.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/redux/3.6.0/redux.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+
+    //REDUCER
+      const toggle_reducer = function(state = 'ON', action) {
+          switch(action.type) {
+            case 'TOGGLE': 
+              if(state == 'ON') {
+                return 'OFF';
+              } else {
+                return 'ON';
+              }
+            default:
+              return 'ON';
+          }
+        }
+
+      //CREATE STORE
+      const {createStore} = Redux;
+      const toggle_store = createStore(toggle_reducer);
+
+      //REACT COMPONENT
+      class Toggle extends React.Component {
+        render() {
+          return (
+            <button onClick={this.props.handleClick}>
+              {this.props.value}
+            </button>
+          );
+        }
+      }
+
+      //RENDER THE COMPONENT
+      function render() {
+        ReactDOM.render(
+          <Toggle 
+            value = {toggle_store.getState()}
+            handleClick = {
+              function() {
+                 toggle_store.dispatch( {
+                  type: 'TOGGLE'
+                 })
+              }
+            }
+          />,
+          document.getElementById('root')
+        );
+      }
+
+      //INITIAL RENDER AND SUBSCRIBE TO UPDATES AND RENDER
+      render();
+      toggle_store.subscribe(render);
+
+      </script>
+  </body>
+</html>
