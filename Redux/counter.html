@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hello World</title>
+    <script src="https://unpkg.com/react@latest/dist/react.js"></script>
+    <script src="https://unpkg.com/react-dom@latest/dist/react-dom.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/redux/3.6.0/redux.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+
+
+    	//REDUCER
+    	const counter_reducer =  function (state = 0, action) {
+    		switch(action.type) {
+    			case 'INCREMENT' :
+    				return state + 1;
+    			case 'DECREMENT' :
+    				return state - 1;
+    			default:
+    				return state;
+    		}
+    	}
+
+    	//CREATE STORE
+    	const {createStore} = Redux;
+    	const counter_store = createStore(counter_reducer);
+
+    	//ACTIONS
+    	const Actions = {
+    		decrease: "DECREMENT",
+    		increase: "INCREMENT"
+    	}
+
+    	//CREATE REACT OBJECT
+		class Counter extends React.Component {
+			constructor (props) {
+				super(props);
+			}
+			render () {
+				return (
+					<div>
+						<h1> {this.props.value} </h1> 
+						<button onClick={this.props.onDecreaseClick}> Decrease</button> 
+						<button onClick={this.props.onIncreaseClick}> Increase</button>
+					</div>
+				);
+			}
+		}
+
+		//FUNCTION TO RENDER THE OBJECT
+		function render () {
+			ReactDOM.render(
+		  		<Counter 
+		  				value={counter_store.getState()}
+		  				onDecreaseClick = {() => {
+								counter_store.dispatch({
+								type: Actions.decrease
+							});
+						}}
+						onIncreaseClick = {() => {
+								counter_store.dispatch({
+								type: Actions.increase
+							});
+						}}
+		  		/>,
+			  document.getElementById('root')
+			);
+		}
+
+		//CALL THE RENDER - INITIATE
+		render();
+
+		//SUBSCRIBE TO STATE CHANGES AND INVOKE RENDER
+		counter_store.subscribe(render);
+
+    </script>
+  </body>
+</html>
