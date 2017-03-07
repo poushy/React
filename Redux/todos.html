@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hello World</title>
+    <script src="https://unpkg.com/react@latest/dist/react.js"></script>
+    <script src="https://unpkg.com/react-dom@latest/dist/react-dom.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/redux/3.6.0/redux.js"></script>
+    <style>
+    li {
+    	list-style: none;
+    	cursor: pointer;
+    }
+    li.strikethrough {
+    	text-decoration: line-through;
+    }
+    li.hidden {
+    	display: none;
+    }
+    button {
+    	background: #f7f7f7;
+	    border: 1px solid #eee;
+	    margin: 5px;
+    }
+    button.selected,
+    button:hover {
+    	background: #e1e1e1;
+    }
+	</style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+
+    	//ACTIONS
+    	const Actions = {
+    		todo: {
+    			add: 'ADD_TODO',
+    			toggle: 'TOGGLE_TODO'
+    		},
+    		visibility: {
+    			all: 'SHOW_ALL',
+    			finished: 'SHOW_FINISHED',
+    			unfinished: 'SHOW_UNFINISHED'
+    		}
+    	}
+
+    	//REDUCERS
+    	const todo_reducer =  function (state = [], action) {
+    		switch(action.type) {
+    			case Actions.todo.add :
+    				return [
+    					...state,
+    					{	name: action.value,
+    						finished : false,
+    						id: state.length
+    					}
+    				]
+    			case Actions.todo.toggle :
+    				return state.map((obj, ind)=>{
+    					if(ind == action.value) {
+    						return {
+    							name: obj.name,
+    							finished: !obj.finished
+    						};
+    					}
+    					return obj;
+    				})
+    			default:
+    				return state;
+    		}
+    	}
+    	const visibility_reducer = function (state = 'all', action) {
+    		switch(action.type) {
+    			case Actions.visibility.all :
+    				return 'all'
+    			case Actions.visibility.finished :
+    				return 'finished'
+    			case Actions.visibility.unfinished :
+    				return 'unfinished'
+    			default:
+    				return state;
+    		}
+    	}
+
+    	//COMBINE REDUCERS
+
+    	 
+    	////Combination of reducers
+    	//const todos_reducer = function (state = {} , action) {
+    	//	return {
+    	//		input: input_reducer(state.input, action),
+    	//		todos: todo_reducer(state.todos, action),
+    	//		visibility: visibility_reducer(state.visibility, action)
+    	//	}
+    	//}
+
+    	const {combineReducers} = Redux;
+    	const todos_reducer = combineReducers({
+    		todos : todo_reducer,
+    		visibility : visibility_reducer
+    	});
+
+
+    	//CREATE STORE
+    	const {createStore} = Redux;
+    	const todos_store = createStore(todos_reducer);
+
+
+    	//CREATE REACT OBJECT
+		class Todos extends React.Component {
+			constructor (props) {
+				super(props);
+                this.addTodo = this.props.addTodo.bind(this);
+			}
+			render () {
+				let todos_list = [];
+				for(let i= 0; i < this.props.todos.length; i++) {
+
+					let classNames = ""
+					if (this.props.visibility == "unfinished" && this.props.todos[i].finished) {
+						classNames = "hide";
+					}
+					else if (this.props.visibility != "unfinished" && this.props.todos[i].finished) {
+						classNames = "strikethrough"
+					} else if(this.props.visibility == "finished" && !this.props.todos[i].finished) {
+						classNames = "hidden";
+					}
+
+					todos_list.push(
+						<li key={i} 
+							className = {classNames} 
+							onClick={this.props.toggleTodo.bind(this,i)}>
+							{i+1}) {this.props.todos[i].name}
+						</li>
+					);
+				}
+
+				return (
+					<div>
+						<ul>
+							{todos_list}
+						</ul>
+						<div>
+							<input type="text" ref={node => this.input = node} />
+							<button onClick={() => {
+                                    this.props.addTodo(this.input.value);
+                                    this.input.value = '';
+                                }
+                            }> Add Todo</button>
+						</div>
+						{	this.props.todos.length > 0 &&
+							<div>
+								<button className = {this.props.visibility == "all" ? "selected" : ""}  onClick={this.props.onShowAllClick}> Show All</button> 
+								<button className = {this.props.visibility == "finished" ? "selected" : ""} onClick={this.props.onShowFinishedClick}> Show finished</button>
+								<button className = {this.props.visibility == "unfinished" ? "selected" : ""} onClick={this.props.onShowUnFinishedClick}> Show unfinished</button>
+							</div>
+						}
+					</div>
+				);
+			}
+		}
+
+		//FUNCTION TO RENDER THE OBJECT
+		function render () {
+			ReactDOM.render(
+		  		<Todos 
+		  				todos={todos_store.getState().todos}
+		  				visibility = {todos_store.getState().visibility}
+		  				toggleTodo  = {(index) => {
+								todos_store.dispatch({
+								type: Actions.todo.toggle,
+								value: index
+							});
+						}}
+		  				addTodo  = {(value) => {
+								todos_store.dispatch({
+								type: Actions.todo.add,
+								value: value
+							});
+						}}
+		  				onShowAllClick = {() => {
+								todos_store.dispatch({
+								type: Actions.visibility.all
+							});
+						}}
+						onShowFinishedClick = {() => {
+								todos_store.dispatch({
+								type: Actions.visibility.finished
+							});
+						}}
+						onShowUnFinishedClick = {() => {
+								todos_store.dispatch({
+								type: Actions.visibility.unfinished
+							});
+						}}
+		  		/>,
+			  document.getElementById('root')
+			);
+		}
+
+		//CALL THE RENDER - INITIATE
+		render();
+
+		//SUBSCRIBE TO STATE CHANGES AND INVOKE RENDER
+		todos_store.subscribe(render);
+
+    </script>
+  </body>
+</html>
